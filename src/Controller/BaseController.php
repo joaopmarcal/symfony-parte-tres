@@ -97,6 +97,10 @@ abstract class BaseController extends AbstractController
 
         $this->getDoctrine()->getManager()->flush();
 
+        $cacheItem = $this->cache->getItem($this->cachePrefix() . $id);
+        $cacheItem->set($existingEntity);
+        $this->cache->save($cacheItem);
+
         return $this->json($existingEntity);
     }
 
@@ -107,6 +111,8 @@ abstract class BaseController extends AbstractController
         $entity = $this->repository->find($id);
         $entityManager->remove($entity);
         $entityManager->flush();
+
+        $this->cache->deleteItem($this->cachePrefix() . $id);
 
         return new Response('', Response::HTTP_NO_CONTENT);
     }
