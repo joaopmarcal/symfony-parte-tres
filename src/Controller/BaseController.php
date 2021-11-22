@@ -6,6 +6,7 @@ use App\Entity\HypermidiaResponse;
 use App\Helper\EntityFactoryInterface;
 use App\Helper\RequestDataExtractor;
 use Doctrine\Common\Persistence\ObjectRepository;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,11 +26,18 @@ abstract class BaseController extends AbstractController
      */
     protected $requestDataExtractor;
 
-    public function __construct(EntityFactoryInterface $entityFactory, RequestDataExtractor $requestDataExtractor, ObjectRepository $repository)
-    {
+    private $cache;
+
+    public function __construct(
+        EntityFactoryInterface $entityFactory, 
+        RequestDataExtractor $requestDataExtractor, 
+        ObjectRepository $repository, 
+        CacheItemPoolInterface $cache
+    ) {
         $this->entityFactory = $entityFactory;
         $this->requestDataExtractor = $requestDataExtractor;
         $this->repository = $repository;
+        $this->cache = $cache;
     }
 
     public function novo(Request $request): Response
@@ -38,6 +46,12 @@ abstract class BaseController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($entity);
         $entityManager->flush();
+
+        $cacheItem = $this->cache->getItem(
+            $this->cachePrefix() . $entity->getId()
+        );
+        $cacheItem->set($entity);
+        $this->cache->save($cacheItem);
 
         return $this->json($entity, Response::HTTP_CREATED);
     }
@@ -95,4 +109,6 @@ abstract class BaseController extends AbstractController
     }
 
     abstract public function updateExistingEntity(int $id, $entity);
+
+    abstract public function cachePrefix(): string;
 }
