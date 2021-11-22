@@ -81,7 +81,10 @@ abstract class BaseController extends AbstractController
 
     public function buscarUm(int $id)
     {
-        $entity = $this->repository->find($id);
+        $entity = $this->cache->hasItem($this->cachePrefix() . $id)
+            ? $this->cache->getItem($this->cachePrefix() . $id)->get()
+            : $this->repository->find($id);
+        $this->repository->find($id);
         $hypermidiaResponse = new HypermidiaResponse($entity, true, Response::HTTP_OK, null);
 
         return $hypermidiaResponse->getResponse();
