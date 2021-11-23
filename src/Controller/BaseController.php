@@ -7,6 +7,7 @@ use App\Helper\EntityFactoryInterface;
 use App\Helper\RequestDataExtractor;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,17 +28,20 @@ abstract class BaseController extends AbstractController
     protected $requestDataExtractor;
 
     private $cache;
+    private $logger;
 
     public function __construct(
         EntityFactoryInterface $entityFactory, 
         RequestDataExtractor $requestDataExtractor, 
         ObjectRepository $repository, 
-        CacheItemPoolInterface $cache
+        CacheItemPoolInterface $cache,
+        LoggerInterface $logger
     ) {
         $this->entityFactory = $entityFactory;
         $this->requestDataExtractor = $requestDataExtractor;
         $this->repository = $repository;
         $this->cache = $cache;
+        $this->logger = $logger;
     }
 
     public function novo(Request $request): Response
@@ -52,6 +56,13 @@ abstract class BaseController extends AbstractController
         );
         $cacheItem->set($entity);
         $this->cache->save($cacheItem);
+
+        $this->logger->notice('Novo registro de {entidade} adicionado com id: {id}.',
+        [
+            'entidade' => get_class($entity),
+            'id' => $entity->getId(),
+        ]
+        );
 
         return $this->json($entity, Response::HTTP_CREATED);
     }

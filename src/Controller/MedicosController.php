@@ -8,6 +8,7 @@ use App\Helper\MedicoFactory;
 use App\Helper\RequestDataExtractor;
 use App\Repository\MedicoRepository;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,9 +20,10 @@ class MedicosController extends BaseController
         MedicoFactory $medicoFactory, 
         RequestDataExtractor $requestDataExtractor, 
         MedicoRepository $repository,
-        CacheItemPoolInterface $cache
+        CacheItemPoolInterface $cache,
+        LoggerInterface $logger
     ){
-        parent::__construct($medicoFactory, $requestDataExtractor, $repository, $cache);
+        parent::__construct($medicoFactory, $requestDataExtractor, $repository, $cache, $logger);
     }
 
     /**
