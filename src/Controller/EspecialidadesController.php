@@ -8,6 +8,7 @@ use App\Helper\RequestDataExtractor;
 use App\Repository\EspecialidadeRepository;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Routing\Annotation\Route;
 
 class EspecialidadesController extends BaseController
 {
@@ -34,4 +35,17 @@ class EspecialidadesController extends BaseController
     {
         return 'especialidade_';
     }
+
+    /**
+     * @Route ("/especialidades_html")
+     */
+    public function especialidadesEmHTML()
+    {
+        $especialidades = $this->repository->findAll();
+
+        return $this->render('especialidades.html.twig', [
+            'especialidades' => $especialidades
+        ]);
+    }
+
 }
