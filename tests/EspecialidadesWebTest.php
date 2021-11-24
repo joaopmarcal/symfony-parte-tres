@@ -59,4 +59,13 @@ class EspecialidadesWebTest extends WebTestCase
         ]));
         self::assertEquals(201, $client->getResponse()->getStatusCode());
     }
+
+    public function testHtmlEspecialidades()
+    {
+        $client = self::createClient();
+        $client->request('GET', '/especialidades_html');
+
+        $this->assertSelectorTextContains('h1', 'Especialidades');
+        $this->assertSelectorExists('.especialidade');
+    }
 }
